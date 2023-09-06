@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: gateway-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9000
+  cloud:
+    gateway:
+      routes:
+        - id: msvc-products
+          uri: lb://msvc-products
+          predicates:
+            - Path=/api/products/**
+          filters:
+            - SetPath=/
+            - StripPrefix=2
+        - id: msvc-order
+          uri: lb://msvc-order
+          predicates:
+            - Path=/api/order/**
+          filters:
+            - StripPrefix=2
+        - id: msvc-inventory
+          uri: lb://msvc-inventory
+          predicates:
+            - Path=/api/inventory/**
+          filters:
+            - StripPrefix=2
+server:
+  port: ${PORT:8090}
