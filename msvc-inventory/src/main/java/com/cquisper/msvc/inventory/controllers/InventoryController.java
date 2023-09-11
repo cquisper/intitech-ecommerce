@@ -14,13 +14,13 @@ public class InventoryController {
 
     private final InventoryService inventoryService;
 
-    @GetMapping
+    @GetMapping("/stock")
     @ResponseStatus(HttpStatus.OK)
     public List<InventoryResponse> isInStock(@RequestParam("product-code") List<String> productCode) {
         return this.inventoryService.isInStock(productCode);
     }
 
-    @GetMapping("/all")
+    @GetMapping("/")
     @ResponseStatus(HttpStatus.OK)
     public List<InventoryResponse> getAllInventory(){
         return this.inventoryService.getAllInventory();

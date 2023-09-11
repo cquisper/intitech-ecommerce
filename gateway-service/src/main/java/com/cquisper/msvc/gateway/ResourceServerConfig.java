@@ -16,10 +16,10 @@ public class ResourceServerConfig {
         return http
                 .authorizeExchange(authorizeRequest -> {
                     authorizeRequest
-                            .pathMatchers(HttpMethod.GET,"/api/products").permitAll()
-                            .pathMatchers(HttpMethod.POST,"/api/products").hasAnyAuthority("USER", "ADMIN")
-                            .pathMatchers("/api/inventory/all").hasAnyAuthority("USER", "ADMIN")
-                            .pathMatchers(HttpMethod.POST,"/api/order").hasAnyAuthority("USER", "ADMIN")
+                            .pathMatchers(HttpMethod.GET,"/api/products/").permitAll()
+                            .pathMatchers(HttpMethod.POST,"/api/products/create").hasAnyAuthority("USER", "ADMIN")
+                            .pathMatchers("/api/inventory/").hasAnyAuthority("USER", "ADMIN")
+                            .pathMatchers(HttpMethod.POST,"/api/order/place").hasAnyAuthority("USER", "ADMIN")
                             .anyExchange()
                             .authenticated();
                 })

@@ -9,21 +9,23 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 public class ProductController {
 
     private final ProductService productService;
 
-    @GetMapping({"","/"})
+    @GetMapping("/")
     @ResponseStatus(HttpStatus.OK)
     public Flux<ProductResponse> getAllProducts() {
         return this.productService.getAllProducts();
     }
 
-    @PostMapping({"","/"})
+    @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<String> createProduct(@RequestBody ProductRequest productRequest) {
+    public Mono<Map<String, Object>> createProduct(@RequestBody ProductRequest productRequest) {
         return this.productService.createProduct(productRequest);
     }
 }

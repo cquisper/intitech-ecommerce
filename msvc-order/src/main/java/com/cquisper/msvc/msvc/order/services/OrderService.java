@@ -49,6 +49,6 @@ public class OrderService {
             throw new IllegalArgumentException("Product out of stock");
         }
 
-        return Map.of("info", "Order placed successfully");
+        return Map.of("message", "Order placed successfully");
     }
 }

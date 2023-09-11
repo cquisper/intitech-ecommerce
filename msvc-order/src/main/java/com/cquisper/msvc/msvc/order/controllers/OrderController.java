@@ -9,13 +9,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/order")
 @RequiredArgsConstructor
 public class OrderController {
 
     private final OrderService orderService;
 
-    @PostMapping
+    @PostMapping("/place")
     @ResponseStatus(HttpStatus.CREATED)
     public Map<String, Object> placeOrder(@RequestBody OrderRequest orderRequest) {
         return this.orderService.placeOrder(orderRequest);

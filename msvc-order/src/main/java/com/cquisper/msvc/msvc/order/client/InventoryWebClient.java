@@ -16,7 +16,7 @@ public class InventoryWebClient {
 
     public Flux<InventoryResponse> isInStock(List<String> productsCode){
         return this.webClientBuilder.build().get()
-                .uri("http://msvc-inventory/api/inventory", uriBuilder ->
+                .uri("http://msvc-inventory/stock", uriBuilder ->
                         uriBuilder.queryParam("product-code", productsCode).build())
                 .retrieve()
                 .bodyToFlux(InventoryResponse.class);

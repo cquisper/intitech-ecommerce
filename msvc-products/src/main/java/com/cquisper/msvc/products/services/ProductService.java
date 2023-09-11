@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -27,7 +29,7 @@ public class ProductService {
                         .build());
     }
 
-    public Mono<String> createProduct(ProductRequest productRequest){
+    public Mono<Map<String, Object>> createProduct(ProductRequest productRequest){
         Product product = Product.builder()
                 .name(productRequest.name())
                 .description(productRequest.description())
@@ -38,7 +40,7 @@ public class ProductService {
                 .map(productResponse -> {
                     String message = String.format("Product {%s} saved", productResponse.getId());
                     log.info(message);
-                    return message;
+                    return Map.of("message", message);
                 });
     }
 }

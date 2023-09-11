@@ -4,14 +4,15 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.List;
 import java.util.UUID;
 
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.proc.SecurityContext;
 
+import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -20,6 +21,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -27,6 +30,7 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthenticationContext;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -34,6 +38,9 @@ import org.springframework.security.oauth2.server.authorization.config.annotatio
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
+import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenContext;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -100,6 +107,7 @@ public class SecurityAuthorizationConfig {
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 //.redirectUri("https://oauthdebugger.com/debug")
                 .redirectUri("http://127.0.0.1:3000/authorized")
                 .postLogoutRedirectUri("http://localhost:9000/")
@@ -109,7 +117,23 @@ public class SecurityAuthorizationConfig {
 
         return new InMemoryRegisteredClientRepository(oidcClient);
     }
-    //http://localhost:9000/oauth2/authorize?client_id=react-client&redirect_uri=http://127.0.0.1:3000/authorized&scope=openid&response_type=code&code_challenge_method=S256&code_challenge=sVqSn1nIX4UxsBjX08rTBhED0ArvgZWIDLHqMxC8swQ
+    //http://localhost:9000/oauth2/authorize?client_id=react-client&redirect_uri=http://127.0.0.1:3000/authorized&scope=openid&response_type=code&code_challenge_method=S256&code_challenge=N4jMm2bhF9cbcBM3QIDmrH430Idh1le5TgTPyhBRgEk
+    @Bean
+    public OAuth2TokenCustomizer<JwtEncodingContext> jwtDecoderCustomizer() {
+        return (context) -> {
+            if (context.getTokenType().getValue().equals("access_token")) {
+                List<String> roles = context.getPrincipal().getAuthorities()
+                        .stream()
+                        .map((GrantedAuthority::getAuthority))
+                        .toList();
+                context.getClaims()
+                        .claim("roles", roles)
+                        .claim("username", context.getPrincipal().getName());
+            }
+            context.getClaims().claim("token_type", context.getTokenType().getValue());
+        };
+    }
+
     @Bean
     public JWKSource<SecurityContext> jwkSource() {
         KeyPair keyPair = generateRsaKey();

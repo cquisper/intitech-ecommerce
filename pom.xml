@@ -23,6 +23,7 @@
         <module>discovery-eureka</module>
         <module>gateway-service</module>
         <module>authorization-service</module>
+        <module>msvc-users</module>
     </modules>
 
     <properties>
