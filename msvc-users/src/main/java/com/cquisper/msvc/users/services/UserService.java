@@ -1,15 +1,17 @@
 package com.cquisper.msvc.users.services;
 
 import com.cquisper.msvc.users.dto.UserRequest;
+import com.cquisper.msvc.users.enums.RoleName;
 import com.cquisper.msvc.users.models.Role;
 import com.cquisper.msvc.users.models.User;
+import com.cquisper.msvc.users.dto.UserResponse;
 import com.cquisper.msvc.users.repositories.RoleRepository;
 import com.cquisper.msvc.users.repositories.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.Set;
@@ -23,17 +25,17 @@ public class UserService {
 
     private final RoleRepository roleRepository;
 
-    private final PasswordEncoder passwordEncoder;
-
     @Transactional
     public Map<String, Object> createUser(UserRequest userRequest){
-        Set<Role> roles = this.roleRepository.findByNameIn(userRequest.roles());
+        Set<Role> roles = this.roleRepository.findByNameIn(userRequest.roles().stream()
+                .map(RoleName::valueOf)
+                .toList());
 
         log.info("roles: {}", roles);
 
         User user = User.builder()
                 .username(userRequest.username())
-                .password(passwordEncoder.encode(userRequest.password()))
+                .password(userRequest.password())
                 .enabled(true)
                 .photo(userRequest.photo())
                 .roles(roles)
@@ -44,5 +46,18 @@ public class UserService {
         this.userRepository.save(user);
 
         return Map.of("message", String.format("user [%s] created successfully", user.getUsername()));
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponse findByUsername(String username){
+        return this.userRepository.findByUsername(username)
+                .map(user -> UserResponse.builder()
+                        .username(user.getUsername())
+                        .password(user.getPassword())
+                        .enabled(user.getEnabled())
+                        .roles(user.getRoles().stream().map(role -> role.getName().name()).toList())
+                        .build()
+                )
+                .orElseThrow(() -> new RuntimeException("user not found"));
     }
 }

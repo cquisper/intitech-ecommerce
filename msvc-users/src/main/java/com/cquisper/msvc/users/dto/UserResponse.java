@@ -5,12 +5,12 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-public record UserRequest(
+public record UserResponse(
         String username,
 
         String password,
 
-        String photo,
+        Boolean enabled,
 
         List<String> roles
 ) {

@@ -1,13 +1,11 @@
 package com.cquisper.msvc.users.controllers;
 
 import com.cquisper.msvc.users.dto.UserRequest;
+import com.cquisper.msvc.users.dto.UserResponse;
 import com.cquisper.msvc.users.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -21,5 +19,11 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     public Map<String, Object> createUser(@RequestBody UserRequest userRequest){
         return this.service.createUser(userRequest);
+    }
+
+    @GetMapping("/search/username/{username}")
+    @ResponseStatus(HttpStatus.OK)
+    public UserResponse findByUsername(@PathVariable String username){
+        return this.service.findByUsername(username);
     }
 }
