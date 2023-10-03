@@ -6,12 +6,13 @@ import java.util.List;
 
 @Builder
 public record UserResponse(
-        String username,
-
-        String password,
-
+        Long id,
+        String firstName,
+        String lastName,
+        String email,
+        String mobile,
         Boolean enabled,
-
-        List<String> roles
+        List<String> roles,
+        String photo
 ) {
 }

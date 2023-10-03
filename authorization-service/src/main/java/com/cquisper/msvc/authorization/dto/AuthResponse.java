@@ -5,13 +5,10 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-public record UserResponse(
-        String username,
-
+public record AuthResponse(
+        String email,
         String password,
-
         Boolean enabled,
-
         List<String> roles
 ) {
 }

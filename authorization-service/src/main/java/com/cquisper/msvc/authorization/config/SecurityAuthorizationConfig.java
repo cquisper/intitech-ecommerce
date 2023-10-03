@@ -6,7 +6,6 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.List;
 import java.util.UUID;
-
 import com.cquisper.msvc.authorization.federated.FederatedIdentityConfigurer;
 import com.cquisper.msvc.authorization.federated.UserRepositoryOAuth2UserHandler;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -106,15 +105,17 @@ public class SecurityAuthorizationConfig {
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 //.redirectUri("https://oauthdebugger.com/debug")
-                .redirectUri("http://localhost:3000/authorized")
-                .postLogoutRedirectUri("http://localhost:9000")
+                .redirectUri("http://127.0.0.1:3000/authorized")
+                .postLogoutRedirectUri("http://localhost:8090/api/auth")
                 .scope(OidcScopes.OPENID)
+                .scope(OidcScopes.PROFILE)
                 .clientSettings(ClientSettings.builder().requireProofKey(true).build())
                 .build();
 
         return new InMemoryRegisteredClientRepository(oidcClient);
     }
-    //http://localhost:9000/oauth2/authorize?client_id=react-client&redirect_uri=http://127.0.0.1:3000/authorized&scope=openid&response_type=code&code_challenge_method=S256&code_challenge=NoL3oggzeAaF8ULVbA4cPo7qdnlLbNhr2zE9I8oTC8g
+    //http://localhost:8090/api/auth/oauth2/authorize?client_id=react-client&redirect_uri=http://127.0.0.1:3000/authorized&scope=openid%20profile&response_type=code&response_mode=form_post&code_challenge_method=S256&code_challenge=H611JnJBGMJTp_ETiiyRSF-aRZuVqy9k4Xs9ZWq07Ak
+    //code verifier: W9bwTE7FSfQdRj9gHi2XVaqPMNSgI0Qo056v8rKnSRF
     @Bean
     public OAuth2TokenCustomizer<JwtEncodingContext> jwtDecoderCustomizer() {
         return (context) -> {
@@ -142,12 +143,12 @@ public class SecurityAuthorizationConfig {
     }
 
     @Bean
-    public OAuth2AuthorizationService authorizationService() {
+    public OAuth2AuthorizationService oAuth2AuthorizationService() {
         return new InMemoryOAuth2AuthorizationService();
     }
 
     @Bean
-    public OAuth2AuthorizationConsentService authorizationConsentService() {
+    public OAuth2AuthorizationConsentService oAuth2AuthorizationConsentService() {
         return new InMemoryOAuth2AuthorizationConsentService();
     }
 
@@ -185,6 +186,6 @@ public class SecurityAuthorizationConfig {
 
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
-        return AuthorizationServerSettings.builder().issuer("http://localhost:9000").build();
+        return AuthorizationServerSettings.builder().issuer("http://localhost:8090/api/auth").build();
     }
 }

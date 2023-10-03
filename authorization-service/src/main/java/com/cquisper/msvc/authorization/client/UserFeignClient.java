@@ -1,7 +1,7 @@
 package com.cquisper.msvc.authorization.client;
 
 import com.cquisper.msvc.authorization.dto.UserRequest;
-import com.cquisper.msvc.authorization.dto.UserResponse;
+import com.cquisper.msvc.authorization.dto.AuthResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +16,6 @@ public interface UserFeignClient {
     @PostMapping("/create")
     Map<String, Object> createUser(@RequestBody UserRequest userRequest);
 
-    @GetMapping("/search/username/{username}")
-    UserResponse findByUsername(@PathVariable String username);
+    @GetMapping("/find-by-email/{email}")
+    AuthResponse findByEmail(@PathVariable String email);
 }

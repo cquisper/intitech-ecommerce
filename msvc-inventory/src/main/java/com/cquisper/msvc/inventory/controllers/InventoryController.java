@@ -20,7 +20,7 @@ public class InventoryController {
         return this.inventoryService.isInStock(productCode);
     }
 
-    @GetMapping("/")
+    @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
     public List<InventoryResponse> getAllInventory(){
         return this.inventoryService.getAllInventory();

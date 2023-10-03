@@ -1,5 +1,6 @@
 package com.cquisper.msvc.users.services;
 
+import com.cquisper.msvc.users.dto.AuthResponse;
 import com.cquisper.msvc.users.dto.UserRequest;
 import com.cquisper.msvc.users.enums.RoleName;
 import com.cquisper.msvc.users.models.Role;
@@ -9,11 +10,11 @@ import com.cquisper.msvc.users.repositories.RoleRepository;
 import com.cquisper.msvc.users.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -34,10 +35,12 @@ public class UserService {
         log.info("roles: {}", roles);
 
         User user = User.builder()
-                .username(userRequest.username())
+                .firstName(userRequest.firstName())
+                .lastName(userRequest.lastName())
+                .email(userRequest.email())
+                .mobile(userRequest.mobile())
                 .password(userRequest.password())
                 .enabled(true)
-                .photo(userRequest.photo())
                 .roles(roles)
                 .build();
 
@@ -45,19 +48,47 @@ public class UserService {
 
         this.userRepository.save(user);
 
-        return Map.of("message", String.format("user [%s] created successfully", user.getUsername()));
+        return Map.of("message", String.format("user [%s] created successfully", user.getEmail()));
     }
 
     @Transactional(readOnly = true)
-    public UserResponse findByUsername(String username){
-        return this.userRepository.findByUsername(username)
-                .map(user -> UserResponse.builder()
-                        .username(user.getUsername())
+    public AuthResponse findByEmail(String username){
+        return this.userRepository.findByEmail(username)
+                .map(user -> AuthResponse.builder()
+                        .email(user.getEmail())
                         .password(user.getPassword())
                         .enabled(user.getEnabled())
                         .roles(user.getRoles().stream().map(role -> role.getName().name()).toList())
                         .build()
                 )
                 .orElseThrow(() -> new RuntimeException("user not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserResponse> getAllUsers(){
+        return this.userRepository.findAll()
+                .stream()
+                .map(UserService::entityToDto)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponse getUserById(Long id){
+        return this.userRepository.findById(id)
+                .map(UserService::entityToDto)
+                .orElseThrow(() -> new RuntimeException("user not found"));
+    }
+
+    public static UserResponse entityToDto(User user){
+        return UserResponse.builder()
+                .id(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .mobile(user.getMobile())
+                .enabled(user.getEnabled())
+                .roles(user.getRoles().stream().map(role -> role.getName().name()).toList())
+                .photo(user.getPhoto())
+                .build();
     }
 }

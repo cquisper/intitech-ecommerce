@@ -10,10 +10,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.cquisper.ecommerce</groupId>
-    <artifactId>microservices-ecommerce</artifactId>
+    <artifactId>intitech-ecommerce</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>microservices-ecommerce</name>
+    <name>intitech-ecommerce</name>
     <description>An ecommerce backend with microservices architecture</description>
 
     <modules>
@@ -24,6 +24,8 @@
         <module>gateway-service</module>
         <module>authorization-service</module>
         <module>msvc-users</module>
+        <module>msvc-ratings</module>
+        <module>msvc-blog</module>
     </modules>
 
     <properties>

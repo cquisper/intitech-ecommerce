@@ -6,12 +6,11 @@ import java.util.List;
 
 @Builder
 public record UserRequest(
-        String username,
-
+        String firstName,
+        String lastName,
+        String email,
+        String mobile,
         String password,
-
-        String photo,
-
         List<String> roles
 ) {
 }

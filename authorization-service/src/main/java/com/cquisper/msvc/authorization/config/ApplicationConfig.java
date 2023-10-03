@@ -1,7 +1,7 @@
 package com.cquisper.msvc.authorization.config;
 
 import com.cquisper.msvc.authorization.client.UserFeignClient;
-import com.cquisper.msvc.authorization.dto.UserResponse;
+import com.cquisper.msvc.authorization.dto.AuthResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,8 +20,8 @@ public class ApplicationConfig {
     @Bean
     public UserDetailsService userDetailsService(){
         return username -> {
-            UserResponse userResponse = this.userFeignClient.findByUsername(username);
-            return userResponseToUserDetails(userResponse);
+            AuthResponse authResponse = this.userFeignClient.findByEmail(username);
+            return userResponseToUserDetails(authResponse);
         };
     }
 
@@ -30,12 +30,12 @@ public class ApplicationConfig {
         return new BCryptPasswordEncoder();
     }
 
-    public User userResponseToUserDetails(UserResponse userResponse){
-        return new User(userResponse.username(),
-                userResponse.password(),
-                userResponse.enabled(),
+    public User userResponseToUserDetails(AuthResponse authResponse){
+        return new User(authResponse.email(),
+                authResponse.password(),
+                authResponse.enabled(),
                 true, true, true,
-                userResponse.roles().stream()
+                authResponse.roles().stream()
                         .map(SimpleGrantedAuthority::new)
                         .toList()
         );

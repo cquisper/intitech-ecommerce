@@ -7,7 +7,6 @@ target/
 *.iws
 *.iml
 *.ipr
-src
 
 ### Eclipse ###
 .apt_generated
@@ -31,6 +30,5 @@ build/
 ### VS Code ###
 .vscode/
 
-### Mac OS ###
-.DS_Store
 /.idea/
+/.vscode/

@@ -21,7 +21,7 @@ public class ResourceServerConfig {
                 .authorizeExchange(authorizeRequest -> {
                     authorizeRequest
                             .pathMatchers(HttpMethod.GET,"/api/products/").permitAll()
-                            .pathMatchers("/api/auth/register").permitAll()
+                            .pathMatchers(HttpMethod.GET,"/api/auth/**").permitAll()
                             .pathMatchers(HttpMethod.POST,"/api/products/create").hasAnyAuthority( "ROLE_ADMIN")
                             .pathMatchers(HttpMethod.GET,"/api/inventory/").hasAnyAuthority("ROLE_ADMIN")
                             .pathMatchers(HttpMethod.POST,"/api/order/place").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
