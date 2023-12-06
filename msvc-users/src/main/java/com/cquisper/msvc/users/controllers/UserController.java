@@ -1,5 +1,6 @@
 package com.cquisper.msvc.users.controllers;
 
+import com.cquisper.msvc.users.dto.AddressRequest;
 import com.cquisper.msvc.users.dto.AuthResponse;
 import com.cquisper.msvc.users.dto.UserRequest;
 import com.cquisper.msvc.users.dto.UserResponse;
@@ -25,18 +26,39 @@ public class UserController {
 
     @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
-    public Map<String, Object> createUser(@RequestBody UserRequest userRequest){
+    public UserResponse createUser(@RequestBody UserRequest userRequest){
         return this.service.createUser(userRequest);
     }
 
-    @GetMapping("/find-by-email/{email}")
+    @PutMapping("/update/{id}")
+    public ResponseEntity<UserResponse> updateUser(@RequestBody Map<String, Object> fields, @PathVariable Long id){
+        return ResponseEntity.status(HttpStatus.OK).body(this.service.updateUser(fields, id));
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id){
+        this.service.deleteUser(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @GetMapping("/credentials/{email}")
     @ResponseStatus(HttpStatus.OK)
     public AuthResponse findByEmail(@PathVariable String email){
-        return this.service.findByEmail(email);
+        return this.service.getCredentialsByEmail(email);
     }
 
     @GetMapping("/find-by-id/{id}")
     public ResponseEntity<UserResponse> getUserById(@PathVariable Long id){
         return ResponseEntity.status(HttpStatus.OK).body(this.service.getUserById(id));
+    }
+
+    @GetMapping("/find-by-email/{email}")
+    public ResponseEntity<UserResponse> getUserByEmail(@PathVariable String email){
+        return ResponseEntity.status(HttpStatus.OK).body(this.service.findByEmail(email));
+    }
+
+    @PutMapping("/save-address")
+    public ResponseEntity<UserResponse> saveAddress(@RequestBody AddressRequest addressRequest){
+        return ResponseEntity.status(HttpStatus.OK).body(this.service.saveAddress(addressRequest));
     }
 }

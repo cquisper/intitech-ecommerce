@@ -1,7 +1,7 @@
 package com.cquisper.msvc.ratings.controllers;
 
 import com.cquisper.msvc.ratings.dto.RatingResponse;
-import com.cquisper.msvc.ratings.dto.RatingResquest;
+import com.cquisper.msvc.ratings.dto.RatingRequest;
 import com.cquisper.msvc.ratings.service.RatingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,7 +23,7 @@ public class RatingController {
 
     @PostMapping("/rating")
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<RatingResponse> ratingProduct(@RequestBody RatingResquest ratingResquest){
-        return this.ratingService.ratingToProduct(ratingResquest);
+    public Mono<RatingResponse> ratingProduct(@RequestBody RatingRequest ratingRequest, @RequestHeader("X-Email") String email){
+        return this.ratingService.ratingToProduct(ratingRequest, email);
     }
 }

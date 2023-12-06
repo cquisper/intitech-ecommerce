@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: msvc-cart
+  datasource:
+    url: jdbc:mysql://localhost:3306/msvc-cart?serverTimezone=America/Lima
+    username: root
+    password: admin
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQLDialect
+server:
+  port: 8093

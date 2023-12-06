@@ -12,6 +12,13 @@ public class UserWebClient {
 
     private final WebClient.Builder userWebClient;
 
+    public Mono<User> getUserByEmail(String email){
+        return this.userWebClient.build().get()
+                .uri("http://msvc-users/find-by-email/{email}", email)
+                .retrieve()
+                .bodyToMono(User.class);
+    }
+
     public Mono<User> getUserById(Long id){
         return this.userWebClient.build().get()
                 .uri("http://msvc-users/find-by-id/{id}", id)

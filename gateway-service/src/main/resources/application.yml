@@ -14,7 +14,7 @@ spring:
           predicates:
             - Path=/api/products/**
           filters:
-            - SetPath=/
+            #- SetPath=/
             - StripPrefix=2
         - id: msvc-order
           uri: lb://msvc-order
@@ -28,10 +28,58 @@ spring:
             - Path=/api/inventory/**
           filters:
             - StripPrefix=2
-        - id: authorization-service
-          uri: lb://authorization-service
+        - id: auth-service
+          uri: lb://auth-service
           predicates:
             - Path=/api/auth/**
+          filters:
+            - StripPrefix=2
+        - id: msvc-users
+          uri: lb://msvc-users
+          predicates:
+            - Path=/api/users/**
+          filters:
+            - StripPrefix=2
+        - id: msvc-ratings
+          uri: lb://msvc-ratings
+          predicates:
+            - Path=/api/ratings/**
+          filters:
+            - StripPrefix=2
+        - id: msvc-blog
+          uri: lb://msvc-blog
+          predicates:
+            - Path=/api/blog/**
+          filters:
+            - StripPrefix=2
+        - id: upload-service
+          uri: lb://upload-service
+          predicates:
+            - Path=/api/upload/**
+          filters:
+            - StripPrefix=2
+        - id: msvc-coupon
+          uri: lb://msvc-coupon
+          predicates:
+            - Path=/api/coupon/**
+          filters:
+            - StripPrefix=2
+        - id: msvc-cart
+          uri: lb://msvc-cart
+          predicates:
+            - Path=/api/cart/**
+          filters:
+            - StripPrefix=2
+        - id: msvc-enquire
+          uri: lb://msvc-enquire
+          predicates:
+            - Path=/api/enquire/**
+          filters:
+            - StripPrefix=2
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/payment/**
           filters:
             - StripPrefix=2
 server:

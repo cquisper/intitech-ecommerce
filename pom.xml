@@ -14,7 +14,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>intitech-ecommerce</name>
-    <description>An ecommerce backend with microservices architecture</description>
+    <description>Intitech E-Commerce, a backend with microservices architecture</description>
 
     <modules>
         <module>msvc-products</module>
@@ -22,10 +22,15 @@
         <module>msvc-order</module>
         <module>discovery-eureka</module>
         <module>gateway-service</module>
-        <module>authorization-service</module>
+        <module>auth-service</module>
         <module>msvc-users</module>
         <module>msvc-ratings</module>
         <module>msvc-blog</module>
+        <module>msvc-coupon</module>
+        <module>upload-service</module>
+        <module>msvc-cart</module>
+        <module>msvc-enquire</module>
+        <module>payment-service</module>
     </modules>
 
     <properties>

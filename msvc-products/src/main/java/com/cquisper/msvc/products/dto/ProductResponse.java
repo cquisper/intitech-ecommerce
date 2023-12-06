@@ -1,11 +1,11 @@
 package com.cquisper.msvc.products.dto;
 
 import com.cquisper.msvc.products.models.Rating;
-import com.cquisper.msvc.products.models.enums.Color;
-import com.cquisper.msvc.products.models.enums.Image;
+import com.cquisper.msvc.products.models.entities.Image;
 import lombok.Builder;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
@@ -19,9 +19,12 @@ public record ProductResponse(
         List<String> colors,
         String brand,
         String tags,
-        List<String> images,
+        List<Image> images,
         List<Rating> ratings,
-        BigDecimal totalRating
+        BigDecimal totalRating,
+        Integer quantity,
+        Integer sold,
+        LocalDateTime createdAt
 )
 {
 }

@@ -17,10 +17,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service @Slf4j
 @RequiredArgsConstructor
@@ -42,12 +40,18 @@ public class BlogService {
                 .map(BlogService::entityToDto);
     }
 
-    public Mono<BlogResponse> createBlog(BlogRequest blogRequest) {
-        return this.blogRepository.insert(dtoToEntity(blogRequest))
+    public Mono<BlogResponse> createBlog(BlogRequest blogRequest, String email) {
+        return this.userWebClient.getUserByEmail(email)
+                .switchIfEmpty(Mono.error(new RuntimeException("User not found")))
+                .flatMap(user -> {
+                    Blog blog = dtoToEntity(blogRequest);
+                    blog.setAuthor(user);
+                    return this.blogRepository.insert(blog);
+                })
                 .map(BlogService::entityToDto);
     }
 
-    public Mono<BlogResponse> updateBlog(Map<Object, Object> fields, String id){
+    public Mono<BlogResponse> updateBlog(Map<String, Object> fields, String id){
         return this.blogRepository.findById(id)
                 .doOnNext(blog -> {
                     fields.forEach((key, value) -> {
@@ -61,9 +65,9 @@ public class BlogService {
                 .map(BlogService::entityToDto);
     }
 
-    public Mono<BlogResponse> giveLikeToBlog(String idBlog, Long idUser){
+    public Mono<BlogResponse> giveLikeToBlog(String idBlog, String email){
         return this.blogRepository.findById(idBlog)
-                .flatMap(blog -> this.userWebClient.getUserById(idUser)
+                .flatMap(blog -> this.userWebClient.getUserByEmail(email)
                         .doOnNext(user -> {
                             if (blog.getLikeUsers().add(user)) {
                                 blog.setNumLikes(blog.getNumLikes() + 1);
@@ -72,16 +76,18 @@ public class BlogService {
                                 blog.getLikeUsers().remove(user);
                             }
                         })
+                        .switchIfEmpty(Mono.error(new RuntimeException("User not found")))
                         .thenReturn(blog)
                 )
+                .switchIfEmpty(Mono.error(new RuntimeException("Blog not found")))
                 .flatMap(this.blogRepository::save)
                 .map(BlogService::entityToDto);
     }
 
-    public Mono<BlogResponse> commentToBlog(CommentRequest commentRequest){
+    public Mono<BlogResponse> commentToBlog(CommentRequest commentRequest, String email){
         return this.blogRepository.findById(commentRequest.blogId())
                 .switchIfEmpty(Mono.error(new RuntimeException("Blog not found")))
-                .flatMap(blog -> this.userWebClient.getUserById(commentRequest.userId())
+                .flatMap(blog -> this.userWebClient.getUserByEmail(email)
                         .switchIfEmpty(Mono.error(new RuntimeException("User not found")))
                         .doOnNext(user -> {
                             Comment comment = Comment.builder()
@@ -91,8 +97,8 @@ public class BlogService {
                                     .replies(List.of())
                                     .numLikes(0)
                                     .build();
-                            blog.getComments().add(comment);
-                            blog.setNumComments(blog.getNumComments() + 1);
+                             blog.getComments().add(comment);
+                             blog.setNumComments(blog.getNumComments() + 1);
                         })
                         .thenReturn(blog)
                 )
@@ -100,13 +106,13 @@ public class BlogService {
                 .map(BlogService::entityToDto);
     }
 
-    public Mono<BlogResponse> replyToCommentBlog(ReplyRequest replyRequest){
+    public Mono<BlogResponse> replyToCommentBlog(ReplyRequest replyRequest, String email){
         return this.blogRepository.findById(replyRequest.blogId())
                 .switchIfEmpty(Mono.error(new RuntimeException("Blog not found")))
                 .flatMap(blog -> commentFindById(blog.getComments(), replyRequest.commentId())
                     .filter(comment -> comment.getId().equals(replyRequest.commentId()))
                     .switchIfEmpty(Mono.error(new RuntimeException("Comment not found")))
-                    .flatMap(comment -> this.userWebClient.getUserById(replyRequest.userId())
+                    .flatMap(comment -> this.userWebClient.getUserByEmail(email)
                             .switchIfEmpty(Mono.error(new RuntimeException("User not found")))
                             .flatMap(user -> {
                                 Reply reply = Reply.builder()
@@ -135,7 +141,6 @@ public class BlogService {
                 )
                 .flatMap(this.blogRepository::save)
                 .map(BlogService::entityToDto);
-
     }
 
     public Mono<Comment> commentFindById(List<Comment> comments, String idComment){
@@ -158,7 +163,9 @@ public class BlogService {
                 .numComments(0)
                 .numLikes(0)
                 .likeUsers(Set.of())
-                .comments(List.of())
+                .comments(new LinkedList<>())
+                .images(blogRequest.images())
+                .createdAt(LocalDateTime.now())
                 .build();
     }
 
@@ -168,11 +175,14 @@ public class BlogService {
                 .title(blog.getTitle())
                 .description(blog.getDescription())
                 .category(blog.getCategory())
+                .author(blog.getAuthor())
                 .numViews(blog.getNumViews())
                 .numComments(blog.getNumComments())
                 .likeUsers(blog.getLikeUsers())
                 .numLikes(blog.getNumLikes())
                 .comments(blog.getComments())
+                .images(blog.getImages())
+                .createdAt(blog.getCreatedAt())
                 .build();
     }
 }

@@ -3,7 +3,7 @@ package com.cquisper.msvc.ratings.service;
 import com.cquisper.msvc.ratings.client.ProductWebClient;
 import com.cquisper.msvc.ratings.client.UserWebClient;
 import com.cquisper.msvc.ratings.dto.RatingResponse;
-import com.cquisper.msvc.ratings.dto.RatingResquest;
+import com.cquisper.msvc.ratings.dto.RatingRequest;
 import com.cquisper.msvc.ratings.models.entities.Rating;
 import com.cquisper.msvc.ratings.repositories.RatingRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,12 +29,14 @@ public class RatingService {
                 .map(RatingService::entityToDto);
     }
 
-    public Mono<RatingResponse> ratingToProduct(RatingResquest ratingRequest){
-        return this.userWebClient.getUserById(ratingRequest.idUser())
+    public Mono<RatingResponse> ratingToProduct(RatingRequest ratingRequest, String email){
+        return this.userWebClient.getUserByEmail(email)
                 .flatMap(user -> this.ratingRepository.findByUserAndIdProduct(user, ratingRequest.idProduct())
-                        .doOnNext(rating -> {
+                        .map(rating -> {
                             rating.setStar(ratingRequest.star());
                             rating.setComment(ratingRequest.comment());
+                            log.info("Rating modified -> : {}", rating);
+                            return rating;
                         })
                         .flatMap(this.ratingRepository::save)
                         .doOnSuccess(rating -> log.info("Rating updated: {}", rating))
@@ -57,7 +59,7 @@ public class RatingService {
                 );
     }
 
-    public static Rating dtoToEntity(RatingResquest ratingRequest){
+    public static Rating dtoToEntity(RatingRequest ratingRequest){
         return Rating.builder()
                 .star(ratingRequest.star())
                 .comment(ratingRequest.comment())

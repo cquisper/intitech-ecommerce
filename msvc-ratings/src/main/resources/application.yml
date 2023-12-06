@@ -3,6 +3,6 @@ spring:
     name: msvc-ratings
   data:
     mongodb:
-      uri: mongodb://127.0.0.1:27017/msvc-ratings
+      uri: mongodb://${DB_HOST:127.0.0.1:27017}/${DB_DATABASE:msvc-ratings}
 server:
   port: 8084

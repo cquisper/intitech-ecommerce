@@ -33,13 +33,13 @@ public class BlogController {
 
     @PostMapping("/create")
     @ResponseStatus(CREATED)
-    public Mono<BlogResponse> createBlog(@RequestBody BlogRequest blogRequest) {
-        return this.blogService.createBlog(blogRequest);
+    public Mono<BlogResponse> createBlog(@RequestBody BlogRequest blogRequest, @RequestHeader("X-Email") String email) {
+        return this.blogService.createBlog(blogRequest, email);
     }
 
     @PatchMapping("/update/{id}")
     @ResponseStatus(OK)
-    public Mono<BlogResponse> updateBlog(@RequestBody Map<Object, Object> fields, @PathVariable String id) {
+    public Mono<BlogResponse> updateBlog(@RequestBody Map<String, Object> fields, @PathVariable String id) {
         return this.blogService.updateBlog(fields, id);
     }
 
@@ -49,21 +49,21 @@ public class BlogController {
         return this.blogService.deleteById(id);
     }
 
-    @PutMapping("/like/{idBlog}/{idUser}")
+    @PutMapping("/like/{idBlog}")
     @ResponseStatus(OK)
-    public Mono<BlogResponse> giveLikeToBlog(@PathVariable String idBlog, @PathVariable Long idUser) {
-        return this.blogService.giveLikeToBlog(idBlog, idUser);
+    public Mono<BlogResponse> giveLikeToBlog(@PathVariable String idBlog, @RequestHeader("X-Email") String email) {
+        return this.blogService.giveLikeToBlog(idBlog, email);
     }
 
     @PostMapping("/comment")
     @ResponseStatus(CREATED)
-    public Mono<BlogResponse> commentToBlog(@RequestBody CommentRequest commentText) {
-        return this.blogService.commentToBlog(commentText);
+    public Mono<BlogResponse> commentToBlog(@RequestBody CommentRequest commentText, @RequestHeader("X-Email") String email) {
+        return this.blogService.commentToBlog(commentText, email);
     }
 
     @PostMapping("/reply")
     @ResponseStatus(CREATED)
-    public Mono<BlogResponse> replyToCommentBlog(@RequestBody ReplyRequest replyRequest) {
-        return this.blogService.replyToCommentBlog(replyRequest);
+    public Mono<BlogResponse> replyToCommentBlog(@RequestBody ReplyRequest replyRequest, @RequestHeader("X-Email") String email) {
+        return this.blogService.replyToCommentBlog(replyRequest, email);
     }
 }

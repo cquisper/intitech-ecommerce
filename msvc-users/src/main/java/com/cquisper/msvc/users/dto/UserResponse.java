@@ -12,7 +12,10 @@ public record UserResponse(
         String email,
         String mobile,
         Boolean enabled,
+        List<String> wishList,
+        String address,
         List<String> roles,
+        String refreshToken,
         String photo
 ) {
 }

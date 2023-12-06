@@ -4,8 +4,10 @@ import lombok.Builder;
 
 @Builder
 public record InventoryResponse(
-        String productCode,
-        Integer availableQuantity,
-        Boolean isInStock
+        Long id,
+        String productId,
+        Integer quantity,
+        Boolean isInStock,
+        Integer sold
 ) {
 }

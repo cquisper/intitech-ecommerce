@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: upload-service
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+cloudinary:
+  cloudName: ${CLOUD_NAME}
+  apiKey: ${API_KEY}
+  apiSecret: ${API_SECRET}
+server:
+    port: 8091

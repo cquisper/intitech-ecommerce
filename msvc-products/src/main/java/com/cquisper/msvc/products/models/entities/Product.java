@@ -10,6 +10,7 @@ import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.math.BigDecimal;
 
@@ -36,10 +37,12 @@ public class Product {
 
     private String tags;
 
-    private List<String> images;
+    private List<Image> images;
 
     @Transient
     private List<Rating> ratings;
 
     private BigDecimal totalRating;
+
+    private LocalDateTime createdAt;
 }

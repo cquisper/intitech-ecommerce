@@ -1,0 +1,3 @@
+ALTER TABLE users_roles
+ALTER COLUMN role_id
+SET ON DELETE CASCADE;
