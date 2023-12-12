@@ -18,7 +18,6 @@ public class UploadServiceApplication {
         SpringApplication.run(UploadServiceApplication.class, args);
     }
 
-
     @Bean
     public CommandLineRunner init() {
         return args -> {

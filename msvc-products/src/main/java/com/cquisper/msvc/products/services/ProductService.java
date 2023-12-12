@@ -205,9 +205,12 @@ public class ProductService {
                             productBuild.sold(inventory.getSold());
                             return this.ratingWebClient.getAllRatingByIdProduct(product.getId())
                                     .collectList()
-                                    .doOnNext(productBuild::ratings)
-                                    .thenReturn(productBuild.build());
+                                    .map(ratings -> {
+                                        productBuild.ratings(ratings);
+                                        return productBuild.build();
+                                    });
                         })
-                );
+                )
+                .doOnSuccess(productResponse -> log.info("Product found: {}", productResponse));
     }
 }

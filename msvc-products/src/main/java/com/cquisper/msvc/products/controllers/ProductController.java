@@ -18,13 +18,13 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @GetMapping("/all")
+    /*@GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
     public Flux<ProductResponse> getAllProducts() {
         return this.productService.getAllProducts();
-    }
+    }*/
 
-    @GetMapping("/all-filter")
+    @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
     public Flux<ProductResponse> getAllProductsFilter(@RequestParam Map<String, String> params) {
         params.forEach((k, v) -> System.out.println(k + ":" + v));

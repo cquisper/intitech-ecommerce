@@ -3,6 +3,7 @@ package com.cquisper.msvc.products.dto;
 import com.cquisper.msvc.products.models.Rating;
 import com.cquisper.msvc.products.models.entities.Image;
 import lombok.Builder;
+import reactor.core.publisher.Flux;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
