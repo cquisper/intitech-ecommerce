@@ -34,14 +34,13 @@ public class ResourceServerConfig implements WebFluxConfigurer {
                 //.cors(corsSpec -> corsSpec.configurationSource(CorsWebFilter.).getConfigurationSource())
                 .authorizeExchange(authorizeRequest -> {
                     authorizeRequest
-                            .pathMatchers(GET, "/api/products/all").permitAll()
-                            .pathMatchers(POST, "/api/auth/register", "/api/auth/authenticate").permitAll()
                             .pathMatchers(GET, "/api/products/all", "/api/products/find-by-id/{id}",
-                                    "/api/products/all-filter").permitAll()
+                                    "/api/products/test").permitAll()
+                            .pathMatchers(POST, "/api/auth/register", "/api/auth/authenticate", "/api/auth/authenticate/admin").permitAll()
                             .pathMatchers(POST, "/api/products/wishlist/{idProduct}").hasAnyAuthority("ROLE_USER")
                             .pathMatchers(GET, "/api/products/wishlist").hasAnyAuthority("ROLE_USER")
                             .pathMatchers(POST,"/api/products/create").hasAnyAuthority( "ROLE_ADMIN")
-                            .pathMatchers(PATCH,"/api/products/update").hasAnyAuthority( "ROLE_ADMIN")
+                            .pathMatchers(PATCH,"/api/products/update/{id}").hasAnyAuthority( "ROLE_ADMIN")
                             .pathMatchers(DELETE,"/api/products/delete").hasAnyAuthority( "ROLE_ADMIN")
                             .pathMatchers(POST,"/api/products/color/create").hasAnyAuthority( "ROLE_ADMIN")
                             .pathMatchers(PATCH, "/api/products/color/update/{id}").hasAnyAuthority( "ROLE_ADMIN")
@@ -84,8 +83,9 @@ public class ResourceServerConfig implements WebFluxConfigurer {
                             .pathMatchers(GET, "/api/inventory/all", "/api/inventory/find-by-id/{id}", "/find-by-product-id/{productId}").permitAll()
                             .pathMatchers(POST, "/api/order/cash-order").hasAnyAuthority( "ROLE_USER")
                             .pathMatchers(GET, "/api/order/get-orders").hasAnyAuthority( "ROLE_USER")
-                            .pathMatchers(GET, "/api/order/get-all-orders", "/api/order/get-orders-by-user/{id}").hasAnyAuthority( "ROLE_ADMIN")
+                            .pathMatchers(GET, "/api/order/get-all-orders", "/api/order/get-orders-by-user/{id}", "/api/order/find-by-id/{id}").hasAnyAuthority( "ROLE_ADMIN")
                             .pathMatchers(PUT, "/api/order/update-status/{id}").hasAnyAuthority( "ROLE_ADMIN")
+                            .pathMatchers(DELETE, "/api/order/delete/{id}").hasAnyAuthority( "ROLE_ADMIN")
                             .pathMatchers(POST, "/api/enquire/create").permitAll()
                             .pathMatchers(PATCH, "/api/enquire/update/{id}").hasAnyAuthority( "ROLE_ADMIN")
                             .pathMatchers(DELETE, "/api/enquire/delete/{id}").hasAnyAuthority( "ROLE_ADMIN")

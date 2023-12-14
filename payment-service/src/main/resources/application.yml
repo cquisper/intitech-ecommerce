@@ -1,5 +1,8 @@
 spring:
   application:
     name: payment-service
+razorpay:
+  apiKey: ${RAZORPAY_KEY}
+  apiSecret: ${RAZORPAY_SECRET}
 server:
   port: 9792

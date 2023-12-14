@@ -7,6 +7,7 @@ import com.cquisper.msvc.order.dto.OrderResponse;
 import com.cquisper.msvc.order.enums.OrderStatus;
 import com.cquisper.msvc.order.models.entity.Order;
 import com.cquisper.msvc.order.models.entity.OrderItem;
+import com.cquisper.msvc.order.repositories.OrderItemRepository;
 import com.cquisper.msvc.order.repositories.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,27 +24,34 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
 
+    private final OrderItemRepository orderItemRepository;
+
     private final ProductWebClient productWebClient;
 
     @Transactional
     public OrderResponse cashOrder(OrderRequest orderRequest, String email){
         return this.entityToDto(this.orderRepository.save(this.dtoToEntity(orderRequest, email)));
     }
-
+    @Transactional(readOnly = true)
+    public OrderResponse findById(Long id){
+        return this.entityToDto(this.orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found")));
+    }
+    @Transactional(readOnly = true)
     public List<OrderResponse> getOrdersForUser(String email){
         return this.orderRepository.findAllByUserOrderByCreateAtDesc(email)
                 .stream()
                 .map(this::entityToDto)
                 .toList();
     }
-
+    @Transactional(readOnly = true)
     public List<OrderResponse> getAllOrders(){
         return this.orderRepository.findAll()
                 .stream()
                 .map(this::entityToDto)
                 .toList();
     }
-
+    @Transactional
     public Order updateOrderStatus(Long id, String status){
         return this.orderRepository.findById(id)
                 .map(order -> {
@@ -73,6 +81,16 @@ public class OrderService {
                 .createAt(LocalDateTime.now())
                 .updateAt(LocalDateTime.now())
                 .build();
+    }
+
+    @Transactional
+    public void deleteOrder(Long id){
+        Order order = this.orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        orderItemRepository.deleteAll(order.getOrderItems());
+
+        this.orderRepository.delete(order);
     }
 
     public OrderResponse entityToDto(Order order){

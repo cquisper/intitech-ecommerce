@@ -30,7 +30,7 @@ ARG TARGET_FOLDER=/app/$MSVC_NAME/target
 
 COPY --from=builder $TARGET_FOLDER/msvc-products-0.0.1-SNAPSHOT.jar .
 
-ARG PORT_APP=8084
+ARG PORT_APP=8080
 
 ENV PORT $PORT_APP
 

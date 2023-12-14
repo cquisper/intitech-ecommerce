@@ -1,6 +1,5 @@
 package com.cquisper.msvc.order.models.entity;
 
-import com.cquisper.msvc.order.models.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,13 +26,13 @@ public class Order {
 
     private String user;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL)
     private ShippingInfo shippingInfo;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(orphanRemoval = true, cascade = CascadeType.ALL)
     private PaymentInfo paymentInfo;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
 
     private LocalDateTime paidAt;

@@ -3,6 +3,6 @@ spring:
     name: msvc-coupon
   data:
     mongodb:
-      uri: mongodb://127.0.0.1:27017/msvc-coupon
+      uri: mongodb://${DB_HOST:127.0.0.1:27017}/${DB_DATABASE:msvc-coupon}
 server:
   port: 8089

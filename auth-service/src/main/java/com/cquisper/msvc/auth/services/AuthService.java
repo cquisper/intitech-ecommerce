@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
@@ -52,6 +53,27 @@ public class AuthService {
 
         log.info("User {} successfully authenticated", userAuthenticate.email());
 
+        return getAuthResponse(res, userAuthenticate);
+    }
+
+    public AuthResponse authenticateAdmin(AuthRequest authRequest, HttpServletResponse res) throws AuthenticationException {
+        this.authManager.authenticate( // Lanza una excepcion si las credenciales son incorrectas
+                new UsernamePasswordAuthenticationToken(
+                        authRequest.email(),
+                        authRequest.password()
+                )
+        );
+
+        UserAuthenticate userAuthenticate = this.userClient.getCredentialsByEmail(authRequest.email());
+
+        if (!userAuthenticate.roles().contains("ROLE_ADMIN")) throw new BadCredentialsException("User is not admin");
+
+        log.info("User admin {} successfully authenticated", userAuthenticate.email());
+
+        return getAuthResponse(res, userAuthenticate);
+    }
+
+    private AuthResponse getAuthResponse(HttpServletResponse res, UserAuthenticate userAuthenticate) {
         String jwtToken = this.buildGenerateToken(userAuthenticate);
 
         String jwtRefreshToken = this.jwtService.generateRefreshToken(userAuthenticate);

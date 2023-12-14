@@ -11,7 +11,7 @@ public record ProductRequest(
         String name,
         String description,
         String category,
-        BigDecimal price,
+        Double price,
         List<String> colors,
         String brand,
         String tags,

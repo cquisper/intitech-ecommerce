@@ -1,0 +1,275 @@
+version: "3.9"
+services:
+  mysql8:
+    container_name: mysql8
+    image: mysql:8
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: msvc-inventory
+    volumes:
+      - data-mysql:/var/lib/mysql
+    restart: always
+    networks:
+      - spring
+  postgres15:
+    container_name: postgres15
+    image: postgres:15-alpine
+    ports:
+      - "5532:5432"
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: msvc-users
+    volumes:
+      - data-postgres:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - spring
+  mongo:
+    container_name: mongo
+    image: mongo:latest
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - data-mongodb:/data/db
+    networks:
+      - spring
+  mongo-express:
+    image: mongo-express:latest
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_BASICAUTH_USERNAME: root
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: admin
+    depends_on:
+      - mongo
+    links:
+      - mongo
+    networks:
+      - spring
+  auth-service:
+    container_name: auth-service
+    build:
+      context: ./
+      dockerfile: ./auth-service/Dockerfile
+    ports:
+      - "9100:9100"
+    environment:
+      JWT_SECRET: e44d4b4eab2fa8a0a0c0b72c3b44e8b065689d8e2efe09603a813fab65d8ff5a
+    networks:
+      - spring
+    depends_on:
+      - discovery-eureka
+    restart: always
+  discovery-eureka:
+    container_name: discovery-eureka
+    build:
+      context: ./
+      dockerfile: ./discovery-eureka/Dockerfile
+    ports:
+      - "8761:8761"
+    networks:
+      - spring
+    restart: always
+  gateway-service:
+    container_name: gateway-service
+    build:
+      context: ./
+      dockerfile: ./gateway-service/Dockerfile
+    ports:
+      - "8090:8090"
+    networks:
+      - spring
+    depends_on:
+      - discovery-eureka
+    restart: always
+  msvc-blog:
+    container_name: msvc-blog
+    build:
+      context: ./
+      dockerfile: ./msvc-blog/Dockerfile
+    ports:
+      - "8085:8085"
+    environment:
+      DB_HOST: mongo:27017
+      DB_DATABASE: msvc-blog
+    networks:
+      - spring
+    depends_on:
+      - discovery-eureka
+    restart: always
+  msvc-cart:
+    container_name: msvc-cart
+    build:
+      context: ./
+      dockerfile: ./msvc-cart/Dockerfile
+    ports:
+      - "8093:8093"
+    environment:
+      DB_HOST: mysql8:3306
+      DB_USERNAME: root
+      DB_PASSWORD: admin
+      DB_DATABASE: msvc-cart
+    networks:
+      - spring
+    depends_on:
+      - discovery-eureka
+    restart: always
+  msvc-coupon:
+    container_name: msvc-coupon
+    build:
+      context: ./
+      dockerfile: ./msvc-coupon/Dockerfile
+    ports:
+      - "8089:8089"
+    environment:
+      DB_HOST: mongo:27017
+      DB_DATABASE: msvc-coupon
+    depends_on:
+      - discovery-eureka
+    networks:
+      - spring
+    restart: always
+  msvc-enquire:
+    container_name: msvc-enquire
+    build:
+      context: ./
+      dockerfile: ./msvc-enquire/Dockerfile
+    ports:
+      - "8099:8099"
+    environment:
+      DB_HOST: mongo:27017
+      DB_DATABASE: msvc-blog
+    networks:
+      - spring
+    depends_on:
+      - discovery-eureka
+    restart: always
+  msvc-inventory:
+    container_name: msvc-inventory
+    build:
+      context: ./
+      dockerfile: ./msvc-inventory/Dockerfile
+    ports:
+      - "8091:8091"
+    environment:
+      DB_HOST: mysql8:3306
+      DB_USERNAME: root
+      DB_PASSWORD: admin
+      DB_DATABASE: msvc-inventory
+    networks:
+      - spring
+    depends_on:
+      - discovery-eureka
+    restart: always
+  msvc-order:
+    container_name: msvc-order
+    build:
+      context: ./
+      dockerfile: ./msvc-order/Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      DB_HOST: mysql8:3306
+      DB_USERNAME: root
+      DB_PASSWORD: admin
+      DB_DATABASE: msvc-order
+    networks:
+      - spring
+    depends_on:
+      - discovery-eureka
+    restart: always
+  msvc-products:
+    container_name: msvc-products
+    build:
+      context: ./
+      dockerfile: ./msvc-products/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: mongo:27017
+      DB_DATABASE: msvc-products
+    networks:
+      - spring
+    depends_on:
+      - discovery-eureka
+    restart: always
+  msvc-ratings:
+    container_name: msvc-ratings
+    build:
+      context: ./
+      dockerfile: ./msvc-ratings/Dockerfile
+    ports:
+      - "8084:8084"
+    environment:
+      DB_HOST: mongo:27017
+      DB_DATABASE: msvc-ratings
+    networks:
+      - spring
+    depends_on:
+      - discovery-eureka
+    restart: always
+  msvc-users:
+    container_name: msvc-users
+    build:
+      context: ./
+      dockerfile: ./msvc-users/Dockerfile
+    ports:
+      - "8088:8088"
+    environment:
+      DB_HOST: postgres15:5432
+      DB_DATABASE: msvc-users
+      DB_USERNAME: postgres
+      DB_PASSWORD: root
+    networks:
+      - spring
+    depends_on:
+      - discovery-eureka
+    restart: always
+  payment-service:
+    container_name: payment-service
+    build:
+      context: ./
+      dockerfile: ./payment-service/Dockerfile
+    ports:
+      - "9792:9792"
+    environment:
+      RAZORPAY_KEY: rzp_test_Fc7Gf4wjX2OS2x
+      RAZORPAY_SECRET: hkGIPkTczSk0LaOaxnlZ1Qad
+    networks:
+      - spring
+    depends_on:
+      - discovery-eureka
+    restart: always
+  upload-service:
+    container_name: upload-service
+    build:
+      context: ./
+      dockerfile: ./upload-service/Dockerfile
+    ports:
+      - "8091:8091"
+    environment:
+      CLOUD_NAME: diphlvnaz
+      API_KEY: 989751988791443
+      API_SECRET: eBgCbTjLeFaz13YPkhs7Dd7OFlQ
+    networks:
+      - spring
+    depends_on:
+      - discovery-eureka
+    restart: always
+volumes:
+  data-mysql:
+    name: data-mysql
+  data-postgres:
+    name: data-postgres
+  data-mongodb:
+    name: data-mongodb
+networks:
+  spring:
+    name: spring

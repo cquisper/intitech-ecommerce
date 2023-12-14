@@ -1,4 +1,4 @@
-ARG MSVC_NAME=msvc-coupon
+ARG MSVC_NAME=payment-service
 
 FROM amazoncorretto:17.0.4-alpine as builder
 
@@ -28,12 +28,12 @@ WORKDIR /app
 
 ARG TARGET_FOLDER=/app/$MSVC_NAME/target
 
-COPY --from=builder $TARGET_FOLDER/msvc-coupon-0.0.1-SNAPSHOT.jar .
+COPY --from=builder $TARGET_FOLDER/payment-service-0.0.1-SNAPSHOT.jar .
 
-ARG PORT_APP=8089
+ARG PORT_APP=9792
 
 ENV PORT $PORT_APP
 
 EXPOSE $PORT
 
-CMD ["java", "-jar", "msvc-coupon-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-jar", "payment-service-0.0.1-SNAPSHOT.jar"]

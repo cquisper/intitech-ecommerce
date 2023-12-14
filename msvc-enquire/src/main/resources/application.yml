@@ -3,6 +3,6 @@ spring:
     name: msvc-enquire
   data:
     mongodb:
-      uri: mongodb://127.0.0.1:27017/msvc-enquire
+      uri: mongodb://${DB_HOST:127.0.0.1:27017}/${DB_DATABASE:msvc-enquire}
 server:
   port: 8099

@@ -24,9 +24,9 @@ import reactor.core.publisher.Mono;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 
 @Service
@@ -41,11 +41,6 @@ public class ProductService {
     private final UserWebClient userWebClient;
 
     private final InventoryWebClient inventoryClient;
-
-    public Flux<ProductResponse> getAllProducts(){
-        return this.productRepository.findAll()
-                .flatMap(this::entityToDto);
-    }
 
     public Mono<ProductResponse> getProductById(String id){
         return this.productRepository.findById(id)
@@ -81,17 +76,25 @@ public class ProductService {
         return this.productRepository.findById(id)
                 .doOnNext(product -> {
                     fields.forEach((key, value) -> {
+                        if (key.equals("quantity")) return;
                         Field field = ReflectionUtils.findRequiredField(Product.class, key.toString());
                         field.setAccessible(true);
                         log.info("Modification: " + field.getName());
-                        if (field.getType().equals(BigDecimal.class)){
-                            BigDecimal valueDecimal = BigDecimal.valueOf((Double) value);
-                            ReflectionUtils.setField(field, product, valueDecimal);
-                        }else {
+                        if (field.getName().equals("price") || field.getName().equals("totalRating")){
+                            log.info("{}, {}", key, value);
+                            Double valueDouble = Double.parseDouble(value.toString());
+                            ReflectionUtils.setField(field, product, valueDouble);
+                        } else {
                             ReflectionUtils.setField(field, product, value);
                         }
                     });
                 })
+                .flatMap(product -> this.inventoryClient.updateInventory(
+                        Map.of("quantity", Integer.parseInt(fields.get("quantity").toString())),
+                        product.getId()
+                        )
+                        .thenReturn(product)
+                )
                 .flatMap(productRepository::save)
                 .flatMap(this::entityToDto)
                 .doOnSuccess(product -> log.info("Product updated: {}", product));
@@ -102,31 +105,43 @@ public class ProductService {
                 .doOnTerminate(() -> log.info("Product deleted: {}", id));
     }
 
-    public Flux<ProductResponse> getAllProductsFilter(Map<String, String> params){
+    public Flux<ProductResponse> getAllProducts(Map<String, String> params){
         String name = params.getOrDefault("name", "");
         String brand = params.getOrDefault("brand", "");
-        String category = params.getOrDefault("category", "");
+        String tags = params.getOrDefault("tags", "");
+        //String category = params.getOrDefault("category", " ");
+        Double priceGte = Double.parseDouble(params.getOrDefault("price[gte]", "0"));
+        Double priceLte = Double.parseDouble(params.getOrDefault("price[lte]", "99999"));
+        log.info("Name {}, Brand: {}, Tags: {}, Price Range: {} - {}", name, brand, tags, priceGte, priceLte);
+        //return this.productRepository.findAllByPriceBetweenSs(name, brand, tags, priceGte, priceLte)
+        return this.productRepository.findAllByPriceBetweenSs(priceGte, priceLte)
+                .flatMap(this::entityToDto);
+    }
 
-        Sort sort;
+    public Flux<ProductResponse> getAllProductsFilter(Map<String, String> params){
+        Sort sort = buildSort(params);
+
         Pageable pageable = Pageable.unpaged();
 
-        if (params.containsKey("sort")){
-            String[] sortParams = params.get("sort").split(",");
-            sort = Sort.by(sortParams);
-        }else{
-            sort = Sort.by("createdAt").ascending();
-        }
+        String name = params.getOrDefault("name", "");
+        String tags = params.getOrDefault("tags", "");
+        String brand = params.getOrDefault("brand", "");
+        String category = params.getOrDefault("category", "");
+        Double priceGte = Double.parseDouble(params.getOrDefault("price[gte]", "0"));
+        Double priceLte = Double.parseDouble(params.getOrDefault("price[lte]", "99999"));
+
+        log.info("Name {}, Brand: {}, Tags: {}, Category: {}, Price Range: {} - {}", name, brand, tags, category, priceGte, priceLte);
 
         if (params.containsKey("page") && params.containsKey("limit")) {
             int page = Integer.parseInt(params.get("page"));
             int limit = Integer.parseInt(params.get("limit"));
             pageable = PageRequest.of(page - 1, limit, sort);
         } else if (pageable.isUnpaged()){
-            return this.productRepository.findAllByNameLikeIgnoreCaseAndBrandLikeIgnoreCaseAndCategoryLikeIgnoreCase(name, brand, category, sort)
+            return this.productRepository.findProductsByCriteria(name, brand, tags, category, priceGte, priceLte, sort)
                     .flatMap(this::entityToDto);
         }
 
-        return this.productRepository.findAllByNameLikeIgnoreCaseAndBrandLikeIgnoreCaseAndCategoryLikeIgnoreCase(name, brand, category, pageable)
+        return this.productRepository.findProductsByCriteria(name, brand, tags, category, priceGte, priceLte, pageable)
                 .flatMap(this::entityToDto);
     }
 
@@ -181,7 +196,7 @@ public class ProductService {
                 .brand(productRequest.brand())
                 .tags(productRequest.tags())
                 .images(productRequest.images())
-                .totalRating(BigDecimal.ZERO)
+                .totalRating(0.0)
                 .build();
     }
 
@@ -212,5 +227,22 @@ public class ProductService {
                         })
                 )
                 .doOnSuccess(productResponse -> log.info("Product found: {}", productResponse));
+    }
+
+    private Sort buildSort(Map<String, String> params) {
+        List<Sort.Order> orders = params.keySet().stream()
+                .filter(paramName -> !paramName.equals("sort") && !paramName.equals("page") && !paramName.equals("limit"))
+                .map(param -> {
+                    log.info("Param sort: {}", param);
+                    if (param.startsWith("-")) {
+                        params.put(param, param.replace("-", ""));
+                        return Sort.Order.desc(param.substring(1));
+                    } else {
+                        return Sort.Order.asc(param);
+                    }
+                })
+                .toList();
+
+        return Sort.by(orders);
     }
 }

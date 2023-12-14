@@ -15,12 +15,14 @@ import com.cquisper.msvc.cart.repository.CartRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service @Slf4j
 @RequiredArgsConstructor
@@ -34,12 +36,22 @@ public class CartService {
 
     private final CouponWebClient couponWebClient;
 
+    @Transactional
     public CartResponse addProductToCart(CartItemsRequest cartItemsRequest, String email){
         User user = this.userWebClient.getUserByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Cart cart = this.cartRepository.findByOrderBy(user.getId())
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
+                .orElseGet(() -> {
+                    Cart newCart = Cart.builder()
+                            .cartItems(new LinkedList<>())
+                            .cartTotal(BigDecimal.ZERO)
+                            .orderBy(user.getId())
+                            .createAt(LocalDateTime.now())
+                            .build();
+                    log.info("Saving new cart: {}", newCart);
+                    return this.cartRepository.save(newCart);
+                });
 
         CartItems cartItem = CartItems.builder()
                 .productId(cartItemsRequest.productId())
@@ -59,7 +71,7 @@ public class CartService {
 
         return getCartResponse(cart);
     }
-
+    @Transactional
     public CartResponse removeProductFromCart(Long cartItemId, String email){
         User user = this.userWebClient.getUserByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -160,14 +172,18 @@ public class CartService {
         User user = this.userWebClient.getUserByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Cart cart = this.cartRepository.findByOrderBy(user.getId())
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
+        AtomicReference<CartResponse> cartResponse = new AtomicReference<>();
 
-        this.cartRepository.delete(cart);
+        this.cartRepository.findByOrderBy(user.getId())
+                .ifPresent(cartEmpty -> {
+                    cartEmpty.getCartItems().clear();
+                    cartEmpty.setCartTotal(BigDecimal.ZERO);
+                    log.info("Cart empty successfully {}", cartEmpty);
+                    this.cartRepository.save(cartEmpty);
+                    cartResponse.set(entityToDto(cartEmpty));
+                });
 
-        log.info("Cart delete {}", cart);
-
-        return entityToDto(cart);
+        return cartResponse.get();
     }
 
     public CartResponse getCartByOrderBy(Long orderBy){

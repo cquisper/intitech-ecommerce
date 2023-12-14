@@ -30,6 +30,12 @@ public class AuthController {
                 .body(this.authService.authenticate(authRequest, res));
     }
 
+    @PostMapping("/authenticate/admin")
+    public ResponseEntity<AuthResponse> authenticateAdmin(@RequestBody AuthRequest authRequest, HttpServletResponse res){
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(this.authService.authenticateAdmin(authRequest, res));
+    }
+
     @GetMapping("/claims")
     public ResponseEntity<ClaimsResponse> extractClaims(@RequestParam String token) {
         return ResponseEntity.ok().body(this.authService.extractClaims(token));

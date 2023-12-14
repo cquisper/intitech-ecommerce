@@ -35,6 +35,11 @@ public class OrderController {
         return ResponseEntity.ok(this.orderService.getOrdersForUser(email));
     }
 
+    @GetMapping("/find-by-id/{id}")
+    public ResponseEntity<OrderResponse> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(this.orderService.findById(id));
+    }
+
     @GetMapping("/get-all-orders")
     public ResponseEntity<List<OrderResponse>> getAllOrders() {
         return ResponseEntity.ok(this.orderService.getAllOrders());
@@ -46,4 +51,9 @@ public class OrderController {
         return ResponseEntity.ok(this.orderService.updateOrderStatus(id, body.get("status")));
     }
 
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteOrder(@PathVariable Long id) {
+        this.orderService.deleteOrder(id);
+        return ResponseEntity.noContent().build();
+    }
 }

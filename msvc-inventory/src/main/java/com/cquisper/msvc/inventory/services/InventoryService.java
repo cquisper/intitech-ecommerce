@@ -26,7 +26,7 @@ public class InventoryService {
 
     @Transactional(readOnly = true)
     public InventoryResponse getInventoryByProductId(String productId){
-        return Optional.ofNullable(this.inventoryRepository.findByProductId(productId))
+        return  this.inventoryRepository.findByProductId(productId)
                 .map(InventoryService::entityToDto)
                 .orElseGet(() -> InventoryResponse.builder().sold(0).quantity(0).build());
     }
@@ -44,6 +44,17 @@ public class InventoryService {
                 .stream()
                 .map(InventoryService::entityToDto)
                 .toList();
+    }
+    @Transactional
+    public InventoryResponse updateInventory(InventoryRequest inventoryRequest, String id){
+        return this.inventoryRepository.findByProductId(id)
+                .map(inventory -> {
+                    inventory.setQuantity(inventoryRequest.quantity());
+                    return inventory;
+                })
+                .map(this.inventoryRepository::save)
+                .map(InventoryService::entityToDto)
+                .orElseThrow(() -> new RuntimeException("Error updating inventory"));
     }
 
     @Transactional(readOnly = true)

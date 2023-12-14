@@ -35,6 +35,12 @@ public class InventoryController {
                 .body(this.inventoryService.getInventoryByProductId(productId));
     }
 
+    @PatchMapping("/update/{id}")
+    public ResponseEntity<InventoryResponse> updateInventory(@RequestBody InventoryRequest inventoryRequest, @PathVariable String id){
+        return ResponseEntity.ok()
+                .body(this.inventoryService.updateInventory(inventoryRequest, id));
+    }
+
     @PutMapping("/update-all")
     public ResponseEntity<List<InventoryResponse>> updateInventories(@RequestBody List<Inventory> inventories){
         return ResponseEntity.ok()

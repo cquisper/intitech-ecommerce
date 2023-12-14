@@ -12,7 +12,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.math.BigDecimal;
 
 @Document("products")
 @AllArgsConstructor @NoArgsConstructor @Builder @Data
@@ -29,7 +28,7 @@ public class Product {
 
     private String category;
 
-    private BigDecimal price;
+    private Double price;
 
     private List<String> colors;
 
@@ -42,7 +41,7 @@ public class Product {
     @Transient
     private List<Rating> ratings;
 
-    private BigDecimal totalRating;
+    private Double totalRating;
 
     private LocalDateTime createdAt;
 }
