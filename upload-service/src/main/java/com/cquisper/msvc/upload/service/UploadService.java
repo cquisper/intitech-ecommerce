@@ -11,8 +11,10 @@ import reactor.core.publisher.Mono;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service @Slf4j
 @RequiredArgsConstructor
@@ -20,25 +22,23 @@ public class UploadService {
 
     private final Cloudinary cloudinary;
 
-    private static final String SERVICE_IMG = "upload-service/img/";
-
-    public Mono<Boolean> init(){
-        return Mono.fromCallable(() -> {
-            File uploadDir = new File(SERVICE_IMG);
-            return uploadDir.mkdir();
-        });
-    }
-
     public Mono<UploadResponse> uploadImage(FilePart filePart){
-        return convertToFile(filePart)
-                .<Map<?,?>>handle((file, sink) -> {
-                    try {
-                        sink.next(cloudinary.uploader().upload(file, ObjectUtils.emptyMap()));
-                    } catch (IOException e) {
-                        sink.error(new RuntimeException(e));
-                    }
-                })
-                .map(this::mapToDto)
+        return Mono.defer(() -> {
+            if (Objects.isNull(filePart)) return Mono.just(ObjectUtils.emptyMap());
+
+            if (filePart.filename().isBlank()) return Mono.just(ObjectUtils.emptyMap());
+
+            return convertToFile(filePart)
+                    .handle((file, sink) -> {
+                        try {
+                            sink.next(cloudinary.uploader().upload(file, ObjectUtils.emptyMap()));
+                        } catch (IOException e) {
+                            sink.error(new RuntimeException(e));
+                        } finally {
+                            file.deleteOnExit();
+                        }
+                    });
+        }).map(this::mapToDto)
                 .doOnSuccess(uploadResponse -> log.info("Image upload: {}", uploadResponse));
     }
 
@@ -48,29 +48,21 @@ public class UploadService {
                 .doOnSuccess(uploadResponse -> log.info("Image delete: {}", uploadResponse));
     }
 
-    public Mono<Boolean> deleteByName(String name){
-        return Mono.fromCallable(() -> {
-            File file = new File(SERVICE_IMG + name);
-            if(file.exists() && file.canRead()){
-                log.info("Image delete: {}", file.getName());
-                return file.delete();
-            }
-            log.info("Image not found: {}", file.getName());
-            return false;
-        });
-    }
-
     private Mono<File> convertToFile(FilePart filePart) {
         if(!Objects.requireNonNull(filePart.headers().getContentType()).toString().startsWith("image")){
             throw new IllegalArgumentException("Only images are allowed");
         }
+
         if (filePart.filename().contains("..")){
             throw new IllegalArgumentException("File name incorrect");
         }
+
         if (filePart.headers().getContentLength() > 1_000_000) { // 1 MB = 1,000,000 bytes
             throw new IllegalArgumentException("File size exceeds limit");
         }
-        File file = new File(SERVICE_IMG + filePart.filename());
+
+        File file = new File(UUID.randomUUID() + filePart.filename());
+
         return filePart.transferTo(file)
                 .thenReturn(file);
     }

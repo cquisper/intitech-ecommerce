@@ -29,11 +29,4 @@ public class UploadController {
     public Mono<UploadResponse> deleteImage(@PathVariable String id){
         return uploadService.deleteImage(id);
     }
-
-    @DeleteMapping("/delete-name/{name}")
-    @ResponseStatus(HttpStatus.OK)
-    public Mono<Boolean> deleteByName(@PathVariable String name){
-        return uploadService.deleteByName(name);
-    }
-
 }

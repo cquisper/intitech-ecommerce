@@ -3,6 +3,10 @@ spring:
     name: msvc-products
   data:
     mongodb:
-      uri: mongodb://${DB_HOST:127.0.0.1:27017}/${DB_DATABASE:msvc-products}
+      uri: mongodb://${MONGODB_HOST:localhost:27017}/${MSVC_PRODUCTS_DB:msvc-products}
 server:
-  port: 8080
+  port: 0
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}/eureka/

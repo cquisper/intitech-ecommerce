@@ -1,6 +1,6 @@
 ARG MSVC_NAME=msvc-cart
 
-FROM amazoncorretto:17.0.4-alpine as builder
+FROM amazoncorretto:17.0.4-alpine AS builder
 
 ARG MSVC_NAME
 
@@ -13,6 +13,8 @@ COPY ./${MSVC_NAME}/.mvn ./.mvn
 COPY ./${MSVC_NAME}/mvnw .
 
 COPY ./${MSVC_NAME}/pom.xml .
+
+RUN sed -i 's/\r$//' ./mvnw && chmod +x ./mvnw
 
 RUN ./mvnw clean package -Dmaven.test.skip -Dmaven.main.skip -Dspring-boot.repackage.skip && rm -r ./target/
 #RUN ./mvnw dependency:go-offline

@@ -10,4 +10,8 @@ cloudinary:
   apiKey: ${API_KEY}
   apiSecret: ${API_SECRET}
 server:
-    port: 8091
+    port: 0
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}/eureka/

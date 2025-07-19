@@ -16,6 +16,4 @@ public class Comment {
     private Integer numLikes;
 
     private List<Reply> replies;
-
-    // Otros atributos que puedas necesitar
 }

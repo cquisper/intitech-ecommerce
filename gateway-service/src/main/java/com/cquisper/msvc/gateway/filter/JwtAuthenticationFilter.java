@@ -28,7 +28,7 @@ public class JwtAuthenticationFilter implements WebFilter {
                         .getRequest()
                         .getHeaders()
                         .getFirst(HttpHeaders.AUTHORIZATION))
-                .doOnNext(authHeader -> log.info("authHeader: " + authHeader))
+                .doOnNext(authHeader -> log.info("authHeader: {}", authHeader))
                 .filter(this::requiresValidate)
                 .switchIfEmpty(chain.filter(exchange).then(Mono.empty()))
                 .map(authHeader -> authHeader.replace("Bearer ", ""))

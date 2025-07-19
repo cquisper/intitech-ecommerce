@@ -10,8 +10,9 @@ import org.springframework.core.annotation.Order;
 import static org.springframework.http.HttpMethod.*;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
-import org.springframework.security.config.web.server.ServerHttpSecurity;;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
@@ -95,6 +96,7 @@ public class ResourceServerConfig implements WebFluxConfigurer {
                             .anyExchange()
                             .authenticated();
                 })
+                .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
                 .addFilterBefore(authenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .build();
     }
@@ -103,12 +105,10 @@ public class ResourceServerConfig implements WebFluxConfigurer {
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(List.of("https://s8qbz78w-3000.brs.devtunnels.ms", "*"));
+        corsConfig.setAllowedOrigins(List.of("http://localhost:3001", "http://localhost:3000"));
         corsConfig.setMaxAge(20000L);
-        //corsConfig.setAllowCredentials(true);
-        corsConfig.setAllowedMethods(List.of(GET.name(),
-                POST.name(), PUT.name(),
-                PATCH.name(), DELETE.name()));
+        corsConfig.setAllowCredentials(true);
+        corsConfig.setAllowedMethods(List.of("*"));
         corsConfig.setAllowedHeaders(List.of(CONTENT_TYPE, AUTHORIZATION));
 
         UrlBasedCorsConfigurationSource source =

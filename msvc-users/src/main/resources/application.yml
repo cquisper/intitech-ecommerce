@@ -2,9 +2,9 @@ spring:
   application:
     name: msvc-users
   datasource:
-    url: jdbc:postgresql://${DB_HOST:postgres15:5432}/${DB_DATABASE:msvc-users}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:root}
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost:5432}/${MSVC_USERS_DB:msvc-users}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASS:root}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -13,7 +13,9 @@ spring:
     properties:
       hibernate:
         format_sql: true
-    database: postgresql
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
 server:
-  port: 8088
+  port: 0
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}/eureka/

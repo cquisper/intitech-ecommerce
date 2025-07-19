@@ -13,6 +13,7 @@ import java.util.Map;
 public class AppConfig {
 
     private final Environment env;
+
     @Bean
     public Cloudinary cloudinary() {
         return new Cloudinary(Map.of(
