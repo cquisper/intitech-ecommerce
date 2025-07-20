@@ -2,7 +2,7 @@ spring:
   application:
     name: msvc-users
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost:5432}/${MSVC_USERS_DB:msvc-users}
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost:5532}/${MSVC_USERS_DB:msvc-users}
     username: ${POSTGRES_USER:postgres}
     password: ${POSTGRES_PASS:root}
     driver-class-name: org.postgresql.Driver
@@ -13,6 +13,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 server:
   port: 0
 eureka:

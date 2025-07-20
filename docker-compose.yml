@@ -10,8 +10,8 @@ services:
       - data-mysql:/var/lib/mysql
       - ./init-mysql.sql:/docker-entrypoint-initdb.d/init-mysql.sql
     restart: unless-stopped
-    networks:
-      - intitech-network
+    #networks:
+    #  - intitech-network
   postgres15:
     container_name: postgres15
     image: postgres:15-alpine
@@ -23,8 +23,8 @@ services:
     volumes:
       - data-postgres:/var/lib/postgresql/data
     restart: unless-stopped
-    networks:
-      - intitech-network
+    #networks:
+    #  - intitech-network
   mongodb:
     container_name: mongodb
     image: mongo:latest
@@ -72,6 +72,7 @@ services:
     build:
       context: ./
       dockerfile: ./discovery-eureka/Dockerfile
+    env_file: .env
     ports:
       - "8761:8761"
     networks:
@@ -82,6 +83,7 @@ services:
     build:
       context: ./
       dockerfile: ./gateway-service/Dockerfile
+    env_file: .env
     ports:
       - "8090:8090"
     networks:
